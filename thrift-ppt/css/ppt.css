@@ -1,0 +1,40 @@
+slide.fill img {
+    position: inherit;
+    left: 0;
+    top: 0;
+    min-width: inherit;
+    min-height: inherit;
+    z-index: -1;
+}
+
+.text-left {
+    text-align: left;
+}
+
+.bg-yellow {
+    background-color: yellow;
+}
+
+.bg-brown {
+    background-color: #CC6600;
+}
+
+.bg-red {
+    background-color: red;
+}
+
+.bg-blue {
+    background-color: blue;
+}
+
+.bg-gray {
+    background-color: gray;
+}
+
+.bg-green {
+    background-color: green;
+}
+
+.bg-purple {
+    background-color: #9933FF;
+}
