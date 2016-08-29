@@ -63,7 +63,22 @@ files: /css/ppt.css
 * 结构体(struct)
 * 异常(exception)
 * 服务(service)
+* 类型定义(Typedefs)
+</br><span class="blue">Thrift supports C/C++ style typedefs.</span>
+```
+typedef i32 MyInteger   // 1
+typedef Tweet ReTweet   // 2
+```
 
+
+[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
+
+## 字段约束 {:.gray3}
+----
+{:.gray3}
+* required: 必须赋值字段禁止为空
+* optional: 可选字段可以为空
+* oneway: 对client请求后不返回响应
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
 
@@ -94,6 +109,7 @@ exception ServerError {
 }
 service PushService {
     void ping(),
+    oneway void zip(),  //client发送请求后不需要任何响应，无返回值
     bool unicast_notification_android(1:string app, 2:DisplayType display_type, 3:string device_tokens, 4:AndroidMsgBody body, 5:map<string, string> extra, 6:Policy policy, 7:string description, 8:bool production_mode) throws (1: ParamError pe, 2: ServerError se),
     bool unicast_notification_ios(1:string app, 2:string device_token, 3:IosMsgAps aps, 4:map<string, string> extra, 5:Policy policy, 6:string description, 7:bool production_mode) throws (1: ParamError pe, 2: ServerError se),
     ...
@@ -197,38 +213,6 @@ service PushService {
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
 
-##　Client Code Sample {:.gray3}
-----
-`client.py` {:.text-left}
-```
-from thrift import Thrift
-from thrift.transport import TSocket
-from thrift.transport import TTransport
-from thrift.protocol import TBinaryProtocol
-from pushservice import PushService
-from pushservice.ttypes import IosMsgAps, AndroidMsgBody
-
-def main():
-    ts = TSocket.TSocket('localhost', 9090)
-    transport = TTransport.TBufferedTransport(ts)
-    protocol = TBinaryProtocol.TBinaryProtocol(transport)
-    client = PushService.Client(protocol)
-    transport.open()
-    client.ping()
-    aps = IosMsgAps("server测试")
-    flag = client.unicast_notification_ios('leying', '851807bf98181e22cd1e6f7db7d43ff8095b5d4ab354bc5370f7e9a204f8a176', aps, {}, None, 'test', False)
-    transport.close()
-
-if __name__ == '__main__':
-    try:
-        main()
-    except Thrift.TException as tx:
-        print '%s' % tx
-```
-
-
-[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
-
 ##　Server Code Sample {:.gray3}
 ----
 `server.py` {:.text-left}
@@ -263,6 +247,37 @@ if __name__ == '__main__':
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
 
+##　Client Code Sample {:.gray3}
+----
+`client.py` {:.text-left}
+```
+from thrift import Thrift
+from thrift.transport import TSocket
+from thrift.transport import TTransport
+from thrift.protocol import TBinaryProtocol
+from pushservice import PushService
+from pushservice.ttypes import IosMsgAps, AndroidMsgBody
+
+def main():
+    ts = TSocket.TSocket('localhost', 9090)
+    transport = TTransport.TBufferedTransport(ts)
+    protocol = TBinaryProtocol.TBinaryProtocol(transport)
+    client = PushService.Client(protocol)
+    transport.open()
+    client.ping()
+    aps = IosMsgAps("server测试")
+    flag = client.unicast_notification_ios('leying', '851807bf98181e22cd1e6f7db7d43ff8095b5d4ab354bc5370f7e9a204f8a176', aps, {}, None, 'test', False)
+    transport.close()
+
+if __name__ == '__main__':
+    try:
+        main()
+    except Thrift.TException as tx:
+        print '%s' % tx
+```
+
+[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
+
 ## 优点和缺点 {:.gray3}
 ---
 {:.blue}
@@ -273,7 +288,7 @@ if __name__ == '__main__':
     * 性能比较好
 * <span class="gray2">缺点</span>：
     * 文档少文档少
-    * 只能由客户端发起请求，不支持双向通讯
+    * 只能由客户端发起请求，不支持双向通信
     * 不具备动态特性(可以通过动态定义生成消息或者动态编译)
 
 
@@ -299,9 +314,51 @@ if __name__ == '__main__':
 
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
-## Thrift vs Protobuf(Protocol Bufffers) {:.gray3}
+## Protobuf(Protocol Bufffers) {:.gray3}
 ----
-* Protobuf
+{:.gray3}
+* Google公司开发并开源的
+* 一种轻便高效的结构化数据存储格式，可以用于结构化数据(序列化)
+* 根据接口定义语言(IDL Interface definition lanuage)构建
+* 与语言和平台无关
+* 适合做数据存储或 RPC 数据交换格式
+* <i class="fa fa-github"></i>github地址：https://github.com/google/protobuf
+`helloworld.proto`
+```
+ package lm;
+ message helloworld
+ {
+    required int32     id = 1;  // ID
+    required string    str = 2;  // str
+    optional int32     opt = 3;  //optional field
+ }
+```
+
+
+[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
+## Thrift vs Protobuf {:.gray3}
+----
+|Thrift| Protobuf
+:-------|:------|:------
+语言支持|Java C++ Python C++ D Dart <br> Go javascript Node.js Cocoa <br> Erlang Haskell OCaml Perl <br> PHP Ruby Smalltalk| C++ Java Python Objective-C <br> C# JavaNano JavaScript Ruby <br> Go PHP(TBD)
+基本类型|bool byte integers(16/32/64) double string map<t1,t2> list<t> set<t> | bool integers(32/64) float double string byte sequence repeated
+枚举 | yes {:.green} | yes {:.green}
+常量 | yes {:.green} | no {:.red}
+结构化类型 | struct | message
+异常处理 | yes {:.green} | no {:.red}
+编译语言 | C++ | C++
+
+
+[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
+## Thrift vs Protobuf {:.gray3}
+----
+|Thrift| Protobuf
+:-------|:------|:------
+RPC实现 | yes {:.green} | no (gRPC) {:.red}
+结构化类型扩展 | no {:.red} | yes {:.green}
+文档 | lacking | good
+优点 | 更多的语言支持, 丰富的数据结构(map, set), 包括了RPC服务的实现| 数据序列化更小，文档丰富
+缺点 | 文档匮乏 | 没有RPC服务实现
 
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
