@@ -318,10 +318,11 @@ if __name__ == '__main__':
 ----
 {:.gray3}
 * Google公司开发并开源的
-* 一种轻便高效的结构化数据存储格式，可以用于结构化数据(序列化)
+* 一种轻便高效的结构化数据存储格式，可以用于结构化数据(序列化), 类似json和XML
 * 根据接口定义语言(IDL Interface definition lanuage)构建
 * 与语言和平台无关
 * 适合做数据存储或 RPC 数据交换格式
+* 消息数据序列化后的大小，比json、XML小很多
 * <i class="fa fa-github"></i>github地址：https://github.com/google/protobuf
 `helloworld.proto`
 ```
