@@ -21,7 +21,7 @@ files: /css/ppt.css
 * 通俗一点就是：调用远程计算机上的程序，就像调用本地程序一样。
 <!-- * ![](/img/rpc.png) -->
 * 流程： <img src="/img/rpc.png" height="300">
-* 常见的RPC框架: Apache的 *Thrift*、google的gRPC、阿里的Dubbo、Apache的Avro等
+* 常见的RPC框架: Apache的 *Thrift*、google的gRPC、阿里的Dubbo、Apache的Avro、微信的phxrpc等
 
 [note]
 1. 调用客户端句柄；执行传送参数
