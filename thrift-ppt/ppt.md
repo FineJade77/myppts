@@ -214,8 +214,8 @@ service PushService {
 ## TProcessPoolServer VS TNonblockingServer {:.gray3}
 ----
 {:.gray3}
-* TProcessPoolServer的实现是每一个进程的工作内容都是一样，在进行IO操作时，如果堵塞住了，进程只能等待(闲置)
-* TNonblockingServer的实现是workers并不是拿着socket连接进行IO操作，而是主进程管理所有的连接，通过系统调用select，获取所有不用等待的连接，放在队列中，分配给workers处理，让workers在请求量比较大的时候都有活干。
+* TProcessPoolServer:每一个进程的工作内容都是一样，在进行IO操作时，如果堵塞住了，进程只能等待(闲置)
+* TNonblockingServer:workers并不是拿着socket连接进行IO操作，而是主线程管理所有的连接，通过系统调用select，获取所有不用等待的连接，放在队列中，分配给workers处理，让workers在请求量比较大的时候都有活干。
 * TProcessPoolServer处理高并发时我们不得不增加workers数量，导致系统在调度进程上产生了很大的开销，很快就会达到性能瓶颈。TNonblockingServer使用多线程实现，可以设置更多的workers并能够更高效的利用CPU。
 
 
