@@ -17,7 +17,7 @@ files: /css/ppt.css
 # 什么是RPC? {:.text-left.red}
 {:.green.text-left}
 * 远程过程调用(Remote Procedure Call)是一个计算机通信协议 {:&.zoomIn}
-* 一种通过网络从远程计算机程序上请求服务，而不需要了解底层网络技术的协议
+* 允许运行于一台计算机的程序调用另一台计算机的子程序，而程序员无需额外地为这个交互作用编程
 * 通俗一点就是：调用远程计算机上的程序，就像调用本地程序一样。
 <!-- * ![](/img/rpc.png) -->
 * 流程： <img src="/img/rpc.png" height="300">
@@ -42,9 +42,9 @@ files: /css/ppt.css
 ## thrift定义 {:.gray3}
 ----
 {:.gray3}
-* 由Fackbook开发,已经开源并且加入到Apache项目 {:&.moveIn}
+* 由Fackbook开发, 贡献给Apache并已经开源 {:&.moveIn}
 * 支持多种编程语言的RPC(Remote Procedure Call远程过程调用)框架
-* 利用自身的协议栈和代码生成工具，根据接口定义语言(IDL Interface definition lanuage)构建,可以在C++,Java,Python等程序语言之间进行无缝结合的高效服务
+* 利用自身的协议栈和代码生成工具，根据接口定义语言(IDL Interface definition lanuage)构建可以在C++,Java,Python等程序语言之间进行无缝结合的高效服务
 * github地址:
     </br><i class="fa fa-github"></i>https://github.com/apache/thrift
     </br><i class="fa fa-github"></i>https://github.com/facebook/fbthrift
@@ -59,7 +59,7 @@ files: /css/ppt.css
     </br> <span class="blue">bool、byte、i16、i32、i64、double、string、binarry</span>
 * 枚举(enum)
 * 容器
-    </br> <span class="blue">list&lt;t&gt;  set&lt;t&gt;  map&lt;t, t&gt;</span>
+    </br> <span class="blue">list&lt;t&gt;  set&lt;t&gt;  map&lt;t1, t2&gt;</span>
 * 结构体(struct)
 * 异常(exception)
 * 服务(service)
@@ -109,7 +109,7 @@ exception ServerError {
 }
 service PushService {
     void ping(),
-    oneway void zip(),  //client发送请求后不需要任何响应，无返回值
+    oneway void zip(),  //client发送请求后不返回响应，无返回值
     bool unicast_notification_android(1:string app, 2:DisplayType display_type, 3:string device_tokens, 4:AndroidMsgBody body, 5:map<string, string> extra, 6:Policy policy, 7:string description, 8:bool production_mode) throws (1: ParamError pe, 2: ServerError se),
     bool unicast_notification_ios(1:string app, 2:string device_token, 3:IosMsgAps aps, 4:map<string, string> extra, 5:Policy policy, 6:string description, 7:bool production_mode) throws (1: ParamError pe, 2: ServerError se),
     ...
@@ -131,7 +131,7 @@ service PushService {
         <br>
         <div class="text-left">
             <span class="bg-brown">&nbsp;&nbsp;</span>
-            <span class="gray3" style="font-size: large">根据 Thrift 定义的服务接口描述文件生成的客户端和服务器端代码</span>
+            <span class="gray3" style="font-size: large">根据 Thrift 的接口定义文件生成的客户端和服务器端代码</span>
         </div>
         <br>
         <div class="text-left">
@@ -169,8 +169,8 @@ service PushService {
 * 主要传输类型:
     * TSocket 使用阻塞的Socket进行IO传输 {:&.zoomIn.blue}
     * TFramedTransport 使用一个带Buffer的Socket进行IO传输，使用NoblockingServer的时候会需要使用TFramedTransport {:.blue}
-    * TFileTransport 使用文件对象进行IO传输 {:.blue}
-    * TZlibTransport 与其他的TTransport配合使用，完成数据的压缩传输 {:.blue}
+    * TFileTransport 使用类文件对象进行IO传输 {:.blue}
+    * TZlibTransport 使用zlib对数据的压缩传输 {:.blue}
 
 [note]
 <img src="/img/thrift-architecture.jpg" height="500">
@@ -201,14 +201,22 @@ service PushService {
 {:.gray3}
 * 负责接收Client的请求，并将请求转发到Processor进行处理
 * 常见的服务端类型有以下几种：
-    * TSimpleServer 单线程服务器端使用标准的阻塞式 I/O {:&.zoomIn.blue}
-    * TThreadPoolServer 多线程服务器端使用标准的阻塞式 I/O {:.blue}
-    * TNonblockingServer 多线程服务器端使用非阻塞式 I/O {:.blue}
-    * THttpServer 基于HTTP的服务器
+    * TSimpleServer 单进程服务器端 使用标准的阻塞式 I/O {:&.zoomIn.blue}
+    * TProcessPoolServer 多进程服务器端 使用标准的阻塞式 I/O {:.blue}
+    * TNonblockingServer 多线程服务器端 使用非阻塞式 I/O {:.blue}
 
 [note]
 <img src="/img/thrift-architecture.jpg" height="500">
 [/note]
+
+
+[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
+## TProcessPoolServer VS TNonblockingServer {:.gray3}
+----
+{:.gray3}
+* TProcessPoolServer的实现是每一个进程的工作内容都是一样，在进行IO操作时，如果堵塞住了，进程只能等待(闲置)
+* TNonblockingServer的实现是workers并不是拿着socket连接进行IO操作，而是主进程管理所有的连接，通过系统调用select，获取所有不用等待的连接，放在队列中，分配给workers处理，让workers在请求量比较大的时候都有活干。
+* TProcessPoolServer处理高并发时我们不得不增加workers数量，导致系统在调度进程上产生了很大的开销，很快就会达到性能瓶颈。TNonblockingServer使用多线程实现，可以设置更多的workers并能够更高效的利用CPU。
 
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
