@@ -249,11 +249,11 @@ class PushServiceHandler:
 if __name__ == '__main__':
     handler = PushServiceHandler()
     processor = PushService.Processor(handler)
-    transport = TSocket.TServerSocket(host="0.0.0.0" ,port=9090)
+    ts = TSocket.TServerSocket(host="0.0.0.0" ,port=9090)
     tfactory = TTransport.TBufferedTransportFactory()
     pfactory = TBinaryProtocol.TBinaryProtocolFactory()
 
-    server = TServer.TSimpleServer(processor, transport, tfactory, pfactory)
+    server = TServer.TSimpleServer(processor, ts, tfactory, pfactory)
     server.serve()
 ```
 
