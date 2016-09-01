@@ -159,6 +159,18 @@ service PushService {
     </div>
 </div>
 
+[note]
+```
+service PushService {
+    void ping(),
+    oneway void zip(),  //client发送请求后不返回响应，无返回值
+    bool unicast_notification_android(1:string app, 2:DisplayType display_type, 3:string device_tokens, 4:AndroidMsgBody body, 5:map<string, string> extra, 6:Policy policy, 7:string description, 8:bool production_mode) throws (1: ParamError pe, 2: ServerError se),
+    bool unicast_notification_ios(1:string app, 2:string device_token, 3:IosMsgAps aps, 4:map<string, string> extra, 5:Policy policy, 6:string description, 7:bool production_mode) throws (1: ParamError pe, 2: ServerError se),
+    ...
+}
+```
+[/note]
+
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
 
@@ -206,17 +218,10 @@ service PushService {
     * TNonblockingServer 多线程服务器端 使用非阻塞式 I/O {:.blue}
 
 [note]
-<img src="/img/thrift-architecture.jpg" height="500">
-[/note]
-
-
-[slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
-## TProcessPoolServer VS TNonblockingServer {:.gray3}
-----
-{:.gray3}
-* TProcessPoolServer:每一个进程的工作内容都是一样，在进行IO操作时，如果堵塞住了，进程只能等待(闲置)
+* TProcessPoolServer:每一个进程的工作内容都是一样,读消息然后进行转发处理，在进行IO操作时，如果堵塞住了，进程只能等待(闲置)
 * TNonblockingServer:workers并不是拿着socket连接进行IO操作，而是主线程管理所有的连接，通过系统调用select，获取所有不用等待的连接，放在队列中，分配给workers处理，让workers在请求量比较大的时候都有活干。
-* TProcessPoolServer处理高并发时我们不得不增加workers数量，导致系统在调度进程上产生了很大的开销，很快就会达到性能瓶颈。TNonblockingServer使用多线程实现，可以设置更多的workers并能够更高效的利用CPU。
+* TProcessPoolServer处理高并发时我们不得不增加workers数量，导致系统在调度进程上产生了很大的开销，很快就会达到性能瓶颈。TNonblockingServer使用多线程实现，可以设置更多的workers并能够更高效的利用CPU，由于夹杂了select及其他调度操作， 对于单个请求的处理会时间比TProcessPoolServer长。
+[/note]
 
 
 [slide style="background-image:url('/img/le-ppt.png');background-size:100% 100%"]
@@ -350,7 +355,7 @@ if __name__ == '__main__':
 |Thrift| Protobuf
 :-------|:------|:------
 语言支持|Java C++ Python C++ D Dart <br> Go javascript Node.js Cocoa <br> Erlang Haskell OCaml Perl <br> PHP Ruby Smalltalk| C++ Java Python Objective-C <br> C# JavaNano JavaScript Ruby <br> Go PHP(TBD)
-基本类型|bool byte integers(16/32/64) double string map<t1,t2> list<t> set<t> | bool integers(32/64) float double string byte sequence repeated
+基本类型|bool byte integers(16/32/64) double string map<t1,t2> list<t> set<t> | bool integers(32/64) float double string bytes repeated
 枚举 | yes {:.green} | yes {:.green}
 常量 | yes {:.green} | no {:.red}
 结构化类型 | struct | message
