@@ -214,6 +214,9 @@ service PushService {
 * 负责接收Client的请求，并将请求转发到Processor进行处理
 * 常见的服务端类型有以下几种：
     * TSimpleServer 单进程服务器端 使用标准的阻塞式 I/O {:&.zoomIn.blue}
+    * TForkingServer forks a new process for each request {:.blue}
+    * TThreadedServer spawns a new thread per each connection {:.blue}
+    * TThreadPoolServer 多线程服务器端 使用标准的阻塞式 I/O {:.blue}
     * TProcessPoolServer 多进程服务器端 使用标准的阻塞式 I/O {:.blue}
     * TNonblockingServer 多线程服务器端 使用非阻塞式 I/O {:.blue}
 
